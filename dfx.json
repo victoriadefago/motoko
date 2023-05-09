@@ -1,5 +1,17 @@
 {
   "canisters": {
+    "first_canister": {
+      "main": "src/first_canister/main.mo",
+      "type": "motoko"
+    },
+    "day1": {
+      "main": "src/day1/main.mo",
+      "type": "motoko"
+    },
+    "day2": {
+      "main": "src/day2/main.mo",
+      "type": "motoko"
+    },
     "motokobootcamp2023_backend": {
       "main": "src/motokobootcamp2023_backend/main.mo",
       "type": "motoko"
