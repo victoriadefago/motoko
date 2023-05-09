@@ -19,17 +19,17 @@ actor Calculator {
     return counter;
   };
 
-  public func div(x : Float) : async Float {
+  public func div(x : Float) : async ?Float {
     if(x == 0) {
-      return (x);
+      return null;
     } else {
       counter /= x;
-      return counter;
+      return ?counter;
     }
   };
 
-  public func reset() : async () {
-    return (0);
+  public func reset() : async() {
+    counter := 0;
   };
 
   public func see() : async Float {
