@@ -12,22 +12,9 @@
       "main": "src/day2/main.mo",
       "type": "motoko"
     },
-    "motokobootcamp2023_backend": {
-      "main": "src/motokobootcamp2023_backend/main.mo",
+    "day3": {
+      "main": "src/day3/main.mo",
       "type": "motoko"
-    },
-    "motokobootcamp2023_frontend": {
-      "dependencies": [
-        "motokobootcamp2023_backend"
-      ],
-      "frontend": {
-        "entrypoint": "src/motokobootcamp2023_frontend/src/index.html"
-      },
-      "source": [
-        "src/motokobootcamp2023_frontend/assets",
-        "dist/motokobootcamp2023_frontend/"
-      ],
-      "type": "assets"
     }
   },
   "defaults": {
