@@ -34,7 +34,7 @@ actor Wall {
 
 
     // Add a new message to the wall
-    public shared({ caller }) func writeMessage(c : Content) : async Nat {
+    public shared ({ caller }) func writeMessage(c : Content) : async Nat {
 
         let id : Nat = messageId;
 
