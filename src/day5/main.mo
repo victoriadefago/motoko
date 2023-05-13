@@ -6,6 +6,12 @@ import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Iter "mo:base/Iter";
 import Int "mo:base/Int";
+import Error "mo:base/Error";
+import ic "ic";
+import Array "mo:base/Array";
+import Buffer "mo:base/Buffer";
+import Debug "mo:base/Debug";
+import Option "mo:base/Option";
 
 
 actor Verifier {
@@ -96,7 +102,7 @@ actor Verifier {
         #UnexpectedError : Text;
     };
 
-    //e35fa-wyaaa-aaaaj-qa2dq-cai
+    //CanisterID e35fa-wyaaa-aaaaj-qa2dq-cai
 
     public shared func test(canisterId : Principal) : async TestResult {
         let calculator = actor(Principal.toText(canisterId)) : actor {
@@ -135,6 +141,11 @@ actor Verifier {
         ans := await calculator.reset();
         ans := await calculator.sub(1);
 
+        if(not (ans == -1)) {
+            return #err(#UnexpectedValue("Function not working"));
+        };
+
+        ans := await calculator.reset();
         if(not (ans == 0)) {
             return #err(#UnexpectedValue("Function not working"));
         };
@@ -144,7 +155,63 @@ actor Verifier {
 
     // PART 3
 
+    public func parseControllersFromCanisterStatusErrorIfCallerNotController(errorMessage : Text) : async [Principal] {
+        let lines = Iter.toArray(Text.split(errorMessage, #text("\n")));
+        let words = Iter.toArray(Text.split(lines[1], #text(" ")));
+        var i = 2;
+        let controllers = Buffer.Buffer<Principal>(0);
+        while (i < words.size()) {
+            controllers.add(Principal.fromText(words[i]));
+            i += 1;
+        };
+        Buffer.toArray<Principal>(controllers);
+    };
 
+    public shared func verifyOwnership(canisterId : Principal, principalId : Principal) : async Bool {
+        try {
+            let ic0 = actor("aaaaa-aa") : actor {
+                canister_status : { canister_id : Principal } -> 
+                    async {
+                        cycles : Nat;
+                    };
+            };
+            let h = await ic0.canister_status({canister_id = canisterId});
+            return false;
+        } catch(e : Error) {
+            let controllers : [Principal] = await parseControllersFromCanisterStatusErrorIfCallerNotController(Error.message(e));
+            return not ((Array.find<Principal>(controllers, func(id : Principal){id == principalId})) == null);
+        };
+    };
 
+    // PART 4
 
-}
+    public shared func verifyWork(canisterId : Principal, principalId: Principal) : async Result.Result<(), Text> {
+
+        let verify : TestResult = await test(canisterId);
+
+        switch (verify) {
+            case(#err(val)){
+                 switch(val) {
+                    case(#UnexpectedValue(text)) { return #err(text) };
+                    case(#UnexpectedError(text)) { return #err(text) };
+                };
+            };
+            case(#ok) {
+                if(await verifyOwnership(canisterId, principalId)){
+                    switch(studentProfileStore.get(principalId)) {
+                        case(null) { 
+                            return #err("The principal does not exist"); 
+                        };
+                        case(?studentProfile) {
+                            let student: StudentProfile = {studentProfile with graduate = true};
+                            studentProfileStore.put(principalId, student);
+                        };
+                    };
+                    return #ok();
+                };
+                #err("Canister IDs do not match");
+            };
+        };
+    };
+
+};
